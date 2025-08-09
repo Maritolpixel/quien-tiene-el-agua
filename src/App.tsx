@@ -1,18 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  Typography,
-} from "@mui/material";
+
 import { createRoot } from "react-dom/client";
 import Map from "react-map-gl/mapbox";
 
 import { DeckGL } from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
+
 import { CSVLoader } from "@loaders.gl/csv";
 import { load } from "@loaders.gl/core";
 import type { MapViewState } from "@deck.gl/core";
@@ -23,6 +16,18 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import BrushTemporal from "./componentes/BrushTemporal";
 
+// Permitiendo scatter cuadrado
+
+class SquareScatterplotLayer extends ScatterplotLayer {
+  getShaders() {
+    const shaders = super.getShaders();
+    shaders.fs = shaders.fs.replace(
+      "if (dist > 1.0) discard;",
+      "if (max(abs(unitPosition.x), abs(unitPosition.y)) > 1.0) discard;"
+    );
+    return shaders;
+  }
+}
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const MAP_STYLE = "mapbox://styles/jdangoh/cmdzkidno009i01ryatoc33ex";
 
@@ -71,7 +76,7 @@ export default function App() {
   // Temporal
   const [fechas, setFechas] = useState({
     fecha_inicio: new Date("1993-01-01"),
-    fecha_final: new Date("2025-12-31"),
+    fecha_final: new Date("2026-01-01"),
   });
   // modal
   localStorage.removeItem("agua_modal_shown");
@@ -83,13 +88,6 @@ export default function App() {
       setOpen(true);
     }
   }, []);
-  const cerrarModal = () => {
-    setOpen(false);
-  };
-  const noVolverAMostrarModal = () => {
-    localStorage.setItem("agua_modal_shown", "true");
-    setOpen(false);
-  };
 
   // mapa
   const [dataSub, setDataSub] = useState([]);
@@ -117,40 +115,48 @@ export default function App() {
 
   const filteredSubData = useMemo(() => {
     if (!dataSub || dataSub.length === 0) return [];
-    console.log("dataSub:", dataSub, Array.isArray(dataSub));
-
+    // @ts-expect-error: los datos deben venir bien
     return dataSub.data.filter((d) => {
-      // @ts-expect-error: los datos deben venir bien
       const pointDate = new Date(d.FECHA);
       return (
         pointDate >= fechas.fecha_inicio && pointDate <= fechas.fecha_final
       );
     });
   }, [dataSub, fechas]);
-  /*function createLayer(id: string, data: any[]) {
-    if (filteredSubData.length === 0) return null;
+  const filteredSupData = useMemo(() => {
+    if (!dataSup || dataSup.length === 0) return [];
+    // @ts-expect-error: los datos deben venir bien
 
-    return new ScatterplotLayer<AnexosPunto>({
-      id,
-      data,
-      radiusMinPixels: 1,
-      radiusMaxPixels: 60,
-      getPosition: (d) => [d.LON, d.LAT, 0] as [number, number, number],
-      getFillColor: (d: AnexosPunto) => {
-        const base = dict_color[d.USO];
-        if (!base) {
-          console.warn(`Color no definido para uso: ${d.USO}`);
-          return [128, 128, 128, 80];
-        }
-        return [...base, 200] as [number, number, number, number];
-      },
-      getRadius: (d: AnexosPunto) => Math.sqrt(d.VOL || 1) / 50,
-      radiusScale: isMac ? 10 * pixelRatio : 10,
-      filled: true,
-      stroked: false,
-      pickable: true,
+    return dataSup.data.filter((d) => {
+      const pointDate = new Date(d.FECHA);
+      return (
+        pointDate >= fechas.fecha_inicio && pointDate <= fechas.fecha_final
+      );
     });
-  }*/
+  }, [dataSup, fechas]);
+  const filteredDesData = useMemo(() => {
+    if (!dataDes || dataDes.length === 0) return [];
+    // @ts-expect-error: los datos deben venir bien
+
+    return dataDes.data.filter((d) => {
+      const pointDate = new Date(d.FECHA);
+      return (
+        pointDate >= fechas.fecha_inicio && pointDate <= fechas.fecha_final
+      );
+    });
+  }, [dataDes, fechas]);
+  const filteredFedData = useMemo(() => {
+    if (!dataFed || dataFed.length === 0) return [];
+    // @ts-expect-error: los datos deben venir bien
+
+    return dataFed.data.filter((d) => {
+      const pointDate = new Date(d.FECHA);
+      return (
+        pointDate >= fechas.fecha_inicio && pointDate <= fechas.fecha_final
+      );
+    });
+  }, [dataFed, fechas]);
+
   const layersSub = useMemo(() => {
     if (filteredSubData.length === 0) return null;
 
@@ -174,39 +180,88 @@ export default function App() {
       stroked: false,
       pickable: true,
     });
-  }, [filteredSubData]);
+  }, [filteredSubData, showSub]);
+  const layersSup = useMemo(() => {
+    if (filteredSupData.length === 0) return null;
 
+    return new ScatterplotLayer<AnexosPunto>({
+      id: "sup",
+      data: filteredSupData,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 60,
+      getPosition: (d) => [d.LON, d.LAT, 0] as [number, number, number],
+      getFillColor: (d: AnexosPunto) => {
+        const base = dict_color[d.USO];
+        if (!base) {
+          console.warn(`Color no definido para uso: ${d.USO}`);
+          return [128, 128, 128, 80];
+        }
+        return [...base, 200] as [number, number, number, number];
+      },
+      getRadius: (d: AnexosPunto) => Math.sqrt(d.VOL || 1) / 50,
+      radiusScale: isMac ? 10 * pixelRatio : 10,
+      filled: true,
+      stroked: false,
+      pickable: true,
+    });
+  }, [filteredSupData, showSup]);
+  const layersDes = useMemo(() => {
+    if (filteredDesData.length === 0) return null;
+
+    return new ScatterplotLayer<AnexosPunto>({
+      id: "des",
+      data: filteredDesData,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 60,
+      getPosition: (d) => [d.LON, d.LAT, 0] as [number, number, number],
+      getFillColor: (d: AnexosPunto) => {
+        const base = dict_color[d.USO];
+        if (!base) {
+          console.warn(`Color no definido para uso: ${d.USO}`);
+          return [128, 128, 128, 80];
+        }
+        return [...base, 200] as [number, number, number, number];
+      },
+      getRadius: (d: AnexosPunto) => Math.sqrt(d.VOL || 1) / 50,
+      radiusScale: isMac ? 10 * pixelRatio : 10,
+      filled: true,
+      stroked: false,
+      pickable: true,
+    });
+  }, [filteredDesData, showDes]);
+  const layersFed = useMemo(() => {
+    if (filteredFedData.length === 0) return null;
+    // @ts-expect-error: los datos deben venir bien
+
+    return new SquareScatterplotLayer<AnexosPunto>({
+      id: "fed",
+      data: filteredFedData,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 60,
+      getPosition: (d) => [d.LON, d.LAT, 0] as [number, number, number],
+      getFillColor: (d: AnexosPunto) => {
+        const base = dict_color[d.USO];
+        if (!base) {
+          console.warn(`Color no definido para uso: ${d.USO}`);
+          return [128, 128, 128, 80];
+        }
+        return [...base, 200] as [number, number, number, number];
+      },
+      getRadius: (d: AnexosPunto) => Math.sqrt(d.VOL || 1) / 50,
+      radiusScale: isMac ? 10 * pixelRatio : 10,
+      filled: true,
+      stroked: false,
+      pickable: true,
+    });
+  }, [filteredFedData, showFed]);
   const layers = [
     showSub && layersSub,
-    showSup && createLayer("sup", dataSup),
-    showDes && createLayer("des", dataDes),
-    showFed && createLayer("fed", dataFed),
+    showSup && layersSup,
+    showDes && layersDes,
+    showFed && layersFed,
   ].filter(Boolean); // Quita los false
   return (
     <>
-      <Dialog open={open} onClose={cerrarModal} maxWidth="sm" fullWidth>
-        <h2>¿Quién tiene el agua?</h2>
-        <DialogContent>
-          <DialogContentText component="div">
-            <Typography gutterBottom>
-              Este mapa interactivo muestra las concesiones de agua otorgadas en
-              México. Puedes explorar los nombres de los titulares, ubicaciones,
-              volúmenes y otros datos públicos.
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Fuente: Registro Público de Derechos de Agua (REPDA), Conagua.
-            </Typography>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={cerrarModal} variant="contained">
-            Explorar el mapa
-          </Button>
-          <Button onClick={noVolverAMostrarModal} variant="contained">
-            No mostrar intro de nuevo
-          </Button>
-        </DialogActions>
-      </Dialog>
       <div className="panel-lateral">
         <BrushTemporal onChange={setFechas}></BrushTemporal>
 

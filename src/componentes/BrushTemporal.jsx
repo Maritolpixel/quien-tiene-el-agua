@@ -13,7 +13,7 @@ const BrushTemporal = ({ onChange }) => {
   const [fecha_inicial, setFechaInicial] = useState(
     formatoTemporal("1990-01-01")
   );
-  const [fecha_final, setFechaFinal] = useState(formatoTemporal("2025-01-01"));
+  const [fecha_final, setFechaFinal] = useState(formatoTemporal("2026-01-01"));
   const escalaTemporal = d3.scaleTime();
 
   useEffect(() => {
@@ -84,7 +84,7 @@ const BrushTemporal = ({ onChange }) => {
 
   return (
     <div>
-      <div ref={brushRef} class="brush">
+      <div ref={brushRef} className="brush">
         <svg>
           <g className="brush"></g>
           <g className="eje"></g>
