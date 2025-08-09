@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -20,6 +20,9 @@ import Checkbox from "@mui/material/Checkbox";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import "mapbox-gl/dist/mapbox-gl.css";
+
+import BrushTemporal from "./componentes/BrushTemporal";
+
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const MAP_STYLE = "mapbox://styles/jdangoh/cmdzkidno009i01ryatoc33ex";
 
@@ -65,6 +68,11 @@ const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function App() {
+  // Temporal
+  const [fechas, setFechas] = useState({
+    fecha_inicio: new Date("1993-01-01"),
+    fecha_final: new Date("2025-12-31"),
+  });
   // modal
   localStorage.removeItem("agua_modal_shown");
   const [open, setOpen] = useState(false);
@@ -107,7 +115,21 @@ export default function App() {
     load(url_anexos_fed, CSVLoader, { csv: { header: true } }).then(setDataFed);
   }, []);
 
-  function createLayer(id: string, data: any[]) {
+  const filteredSubData = useMemo(() => {
+    if (!dataSub || dataSub.length === 0) return [];
+    console.log("dataSub:", dataSub, Array.isArray(dataSub));
+
+    return dataSub.data.filter((d) => {
+      // @ts-expect-error: los datos deben venir bien
+      const pointDate = new Date(d.FECHA);
+      return (
+        pointDate >= fechas.fecha_inicio && pointDate <= fechas.fecha_final
+      );
+    });
+  }, [dataSub, fechas]);
+  /*function createLayer(id: string, data: any[]) {
+    if (filteredSubData.length === 0) return null;
+
     return new ScatterplotLayer<AnexosPunto>({
       id,
       data,
@@ -128,9 +150,34 @@ export default function App() {
       stroked: false,
       pickable: true,
     });
-  }
+  }*/
+  const layersSub = useMemo(() => {
+    if (filteredSubData.length === 0) return null;
+
+    return new ScatterplotLayer<AnexosPunto>({
+      id: "sub",
+      data: filteredSubData,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 60,
+      getPosition: (d) => [d.LON, d.LAT, 0] as [number, number, number],
+      getFillColor: (d: AnexosPunto) => {
+        const base = dict_color[d.USO];
+        if (!base) {
+          console.warn(`Color no definido para uso: ${d.USO}`);
+          return [128, 128, 128, 80];
+        }
+        return [...base, 200] as [number, number, number, number];
+      },
+      getRadius: (d: AnexosPunto) => Math.sqrt(d.VOL || 1) / 50,
+      radiusScale: isMac ? 10 * pixelRatio : 10,
+      filled: true,
+      stroked: false,
+      pickable: true,
+    });
+  }, [filteredSubData]);
+
   const layers = [
-    showSub && createLayer("sub", dataSub),
+    showSub && layersSub,
     showSup && createLayer("sup", dataSup),
     showDes && createLayer("des", dataDes),
     showFed && createLayer("fed", dataFed),
@@ -138,11 +185,7 @@ export default function App() {
   return (
     <>
       <Dialog open={open} onClose={cerrarModal} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <Typography variant="h4" component="h1">
-            ¿Quién tiene el agua?
-          </Typography>
-        </DialogTitle>
+        <h2>¿Quién tiene el agua?</h2>
         <DialogContent>
           <DialogContentText component="div">
             <Typography gutterBottom>
@@ -165,6 +208,8 @@ export default function App() {
         </DialogActions>
       </Dialog>
       <div className="panel-lateral">
+        <BrushTemporal onChange={setFechas}></BrushTemporal>
+
         <h3>Tipo de concesión</h3>
         <FormGroup>
           <FormControlLabel

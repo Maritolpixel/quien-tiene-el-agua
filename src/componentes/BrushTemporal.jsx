@@ -27,8 +27,7 @@ const BrushTemporal = ({ onChange }) => {
       .select("svg")
       .attr("width", ancho)
       .attr("height", alto)
-      .attr("viewBox", [0, 0, ancho, alto])
-      .style("background", "rgb(20,20,20)");
+      .attr("viewBox", [0, 0, ancho, alto]);
 
     // Crear la escala de tiempo
     escalaTemporal
@@ -52,7 +51,7 @@ const BrushTemporal = ({ onChange }) => {
         [margin.left, margin.top],
         [ancho - margin.right, alto - margin.bottom],
       ])
-      .on("end", brushed);
+      .on("brush", brushed);
 
     // Aplicar el brush al grupo SVG
     const brushGroup = svg.select("g.brush").call(brush);
@@ -85,13 +84,15 @@ const BrushTemporal = ({ onChange }) => {
 
   return (
     <div>
-      <div ref={brushRef}>
-        fecha inicial: {formatoString(fecha_inicial)} <br></br>
-        fecha final: {formatoString(fecha_final)}
+      <div ref={brushRef} class="brush">
         <svg>
           <g className="brush"></g>
           <g className="eje"></g>
         </svg>
+        <p>
+          fecha inicial: {formatoString(fecha_inicial)} <br></br>
+          fecha final: {formatoString(fecha_final)}
+        </p>
       </div>
     </div>
   );
