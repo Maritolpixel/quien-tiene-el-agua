@@ -12,7 +12,7 @@ dist
 dist-ssr
 package-lock.json
 *.local
-public/datos
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
