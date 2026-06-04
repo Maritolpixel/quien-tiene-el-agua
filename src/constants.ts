@@ -17,10 +17,10 @@ export const dict_color: Record<string, [number, number, number]> = {
 };
 
 export const DATA_URLS = {
-  sub: "https://tirandocodigo.mx/quien-tiene-el-agua/datos/anexos_sub.csv",
-  sup: "https://tirandocodigo.mx/quien-tiene-el-agua/datos/anexos_sup.csv",
-  des: "https://tirandocodigo.mx/quien-tiene-el-agua/datos/anexos_des.csv",
-  fed: "https://tirandocodigo.mx/quien-tiene-el-agua/datos/anexos_fed.csv",
+  sub: `${import.meta.env.BASE_URL}datos/anexos_sub_06_2025.csv`,
+  sup: `${import.meta.env.BASE_URL}datos/anexos_sup_06_2025.csv`,
+  des: `${import.meta.env.BASE_URL}datos/anexos_des_06_2025.csv`,
+  fed: `${import.meta.env.BASE_URL}datos/anexos_fed_06_2025.csv`,
 };
 
 export const MAP_STYLE =

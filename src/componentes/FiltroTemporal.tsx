@@ -5,7 +5,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import type { Fechas } from "../types";
 
-const MIN = new Date("1990-01-01").getTime();
+const MIN = new Date("1988-01-01").getTime();
 const MAX = new Date("2026-01-01").getTime();
 const MONTH_MS = 30 * 24 * 3600 * 1000;
 const FRAME_MS = 50;
@@ -23,7 +23,7 @@ type Props = { onChange: (f: Fechas) => void };
 
 export function FiltroTemporal({ onChange }: Props) {
   const [value, setValue] = useState<[number, number]>([
-    new Date("1993-01-01").getTime(),
+    new Date("1988-01-01").getTime(),
     MAX,
   ]);
   const [playing, setPlaying] = useState(false);
@@ -104,9 +104,11 @@ export function FiltroTemporal({ onChange }: Props) {
             },
           }}
         >
-          {playing
-            ? <PauseIcon sx={{ fontSize: 16 }} />
-            : <PlayArrowIcon sx={{ fontSize: 16 }} />}
+          {playing ? (
+            <PauseIcon sx={{ fontSize: 16 }} />
+          ) : (
+            <PlayArrowIcon sx={{ fontSize: 16 }} />
+          )}
         </IconButton>
         <div style={{ flex: 1, minWidth: 0, paddingInline: 6 }}>
           <Slider

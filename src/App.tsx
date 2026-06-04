@@ -13,7 +13,7 @@ import type { AnexosPunto, Fechas, Visibility } from "./types";
 
 export default function App() {
   const [fechas, setFechas] = useState<Fechas>({
-    fecha_inicio: new Date("1993-01-01"),
+    fecha_inicio: new Date("1988-01-01"),
     fecha_final: new Date("2026-01-01"),
   });
   const [visibility, setVisibility] = useState<Visibility>({
@@ -23,7 +23,7 @@ export default function App() {
     fed: false,
   });
   const [activeUsos, setActiveUsos] = useState<Set<string>>(
-    new Set(Object.keys(dict_color))
+    new Set(Object.keys(dict_color)),
   );
   const [hoveredObject, setHoveredObject] = useState<AnexosPunto | null>(null);
   const [busqueda, setBusqueda] = useState("");
@@ -51,7 +51,14 @@ export default function App() {
         onHover={({ object }) => setHoveredObject(object ?? null)}
         getTooltip={({ object, layer }) => {
           if (!object) return null;
-          if (busqueda && !(object.TITULAR?.toLowerCase().includes(busqueda.toLowerCase()) ?? false)) return null;
+          if (
+            busqueda &&
+            !(
+              object.TITULAR?.toLowerCase().includes(busqueda.toLowerCase()) ??
+              false
+            )
+          )
+            return null;
           const esFed = layer?.id === "fed";
           return {
             html: [
