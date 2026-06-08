@@ -59,7 +59,7 @@ export function PanelLateral({
         </div>
         <div className="panel-seccion fuente">
           <p>
-            Fuente:
+            Fuente:_
             <a href="https://historico.datos.gob.mx/busca/dataset/concesiones-asignaciones-permisos-otorgados-y-registros-de-obras-situadas-en-zonas-de-libre-alu/resource/1eceb049-bcf4-41a9-a77b-7e1d6d0080c3">
               Otorgamiento de concesiones, asignaciones y permisos para el uso
               explotación y/o aprovehcamiento de las aguas nacionales...
