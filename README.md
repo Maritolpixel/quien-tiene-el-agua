@@ -2,7 +2,8 @@
 
 Visualización interactiva de las concesiones de agua en México, con datos del Registro Público de Derechos de Agua (REPDA) de la CONAGUA.
 
-**[Ver en línea →](https://tirandocodigo.mx/quien-tiene-el-agua)**
+**[Ver en línea →](https://tirandocodigo.mx/quien-tiene-el-agua)** 
+**[Ver en línea (Ranking interactivo) →](https://maritolpixel.github.io/quien-tiene-el-agua/)** 
 
 ## ¿Qué muestra?
 
