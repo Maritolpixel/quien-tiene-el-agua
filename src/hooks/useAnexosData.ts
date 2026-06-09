@@ -24,16 +24,18 @@ export function useAnexosData(fechas: Fechas, activeUsos: Set<string>) {
   const [rawSup, setRawSup] = useState<AnexosPunto[]>([]);
   const [rawDes, setRawDes] = useState<AnexosPunto[]>([]);
   const [rawFed, setRawFed] = useState<AnexosPunto[]>([]);
+  const [pendientes, setPendientes] = useState(4);
 
   useEffect(() => {
+    const fin = () => setPendientes((p) => p - 1);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load(DATA_URLS.sub, CSVLoader, { csv: { header: true } }).then((res: any) => setRawSub(res.data));
+    load(DATA_URLS.sub, CSVLoader, { csv: { header: true } }).then((res: any) => setRawSub(res.data)).finally(fin);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load(DATA_URLS.sup, CSVLoader, { csv: { header: true } }).then((res: any) => setRawSup(res.data));
+    load(DATA_URLS.sup, CSVLoader, { csv: { header: true } }).then((res: any) => setRawSup(res.data)).finally(fin);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load(DATA_URLS.des, CSVLoader, { csv: { header: true } }).then((res: any) => setRawDes(res.data));
+    load(DATA_URLS.des, CSVLoader, { csv: { header: true } }).then((res: any) => setRawDes(res.data)).finally(fin);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    load(DATA_URLS.fed, CSVLoader, { csv: { header: true } }).then((res: any) => setRawFed(res.data));
+    load(DATA_URLS.fed, CSVLoader, { csv: { header: true } }).then((res: any) => setRawFed(res.data)).finally(fin);
   }, []);
 
   const filteredSub = useMemo(() => filterData(rawSub, fechas, activeUsos), [rawSub, fechas, activeUsos]);
@@ -50,5 +52,12 @@ export function useAnexosData(fechas: Fechas, activeUsos: Set<string>) {
     return Array.from(seen).sort();
   }, [rawSub, rawSup, rawDes, rawFed]);
 
-  return { filteredSub, filteredSup, filteredDes, filteredFed, titulares };
+  return {
+    filteredSub,
+    filteredSup,
+    filteredDes,
+    filteredFed,
+    titulares,
+    cargando: pendientes > 0,
+  };
 }
